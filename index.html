@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Personal Dashboard • Lịch Trình, Thói Quen & Tập Trung</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="bg-overlay" aria-hidden="true"></div>
+
+  <div class="app-wrapper">
+    <div class="dashboard-grid">
+      <!-- CỘT TRÁI: Quản lý Công việc -->
+      <main class="glass-card todo-card">
+        <header class="card-header">
+          <div class="status-strip">
+            <div class="date-time-pill" title="Ngày và giờ hiện tại (tự động làm mới lúc 00:00)">
+              <span class="pill-icon" aria-hidden="true">📅</span>
+              <span id="currentDate">Hôm nay</span>
+              <span class="pill-dot">•</span>
+              <span id="currentTime" class="live-clock">--:--:--</span>
+            </div>
+
+            <div class="top-right-pills">
+              <button
+                type="button"
+                class="weather-pill"
+                id="weatherPill"
+                title="Nhiệt độ thời gian thực tại Hà Nội (Nhấn để cập nhật lại)"
+              >
+                <span class="pill-icon" id="weatherIcon" aria-hidden="true">🌡️</span>
+                <span id="weatherText">Hà Nội: Đang tải...</span>
+              </button>
+
+              <div class="bg-controls">
+                <input
+                  type="file"
+                  id="bgFileInput"
+                  accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                  hidden
+                />
+                <button
+                  type="button"
+                  class="bg-action-btn"
+                  id="uploadBgBtn"
+                  title="Tải ảnh (.jpg, .png, .webp) từ máy tính làm hình nền"
+                >
+                  🖼️ Đổi nền
+                </button>
+                <button
+                  type="button"
+                  class="bg-action-btn bg-reset-btn"
+                  id="resetBgBtn"
+                  title="Khôi phục hình nền thiên nhiên mặc định"
+                  hidden
+                >
+                  ↺ Mặc định
+                </button>
+                <input
+                  type="file"
+                  id="importJsonInput"
+                  accept=".json,application/json"
+                  hidden
+                />
+                <button
+                  type="button"
+                  class="bg-action-btn"
+                  id="exportJsonBtn"
+                  title="Xuất toàn bộ dữ liệu ra file JSON để sao lưu"
+                >
+                  💾 Xuất JSON
+                </button>
+                <button
+                  type="button"
+                  class="bg-action-btn"
+                  id="importJsonBtn"
+                  title="Khôi phục dữ liệu từ file sao lưu JSON"
+                >
+                  📂 Nhập JSON
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="header-top">
+            <div class="title-group">
+              <h1 class="app-title">
+                <span class="title-icon" aria-hidden="true">🌿</span>
+                <span>Quản lý công việc</span>
+              </h1>
+              <div class="selected-day-bar">
+                <span id="selectedDayLabel" class="selected-day-label">Đang xem: Hôm nay</span>
+                <button type="button" id="backToTodayBtn" class="back-today-btn" hidden>
+                  ↩ Về hôm nay
+                </button>
+              </div>
+            </div>
+            <button
+              type="button"
+              class="reset-daily-btn"
+              id="resetDailyBtn"
+              title="Bỏ tích tất cả công việc lặp lại hàng ngày để bắt đầu ngày mới"
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                <path d="M3 3v5h5" />
+                <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
+                <path d="M16 16h5v5" />
+              </svg>
+              <span>Làm mới ngày mới</span>
+            </button>
+          </div>
+
+          <div class="progress-section">
+            <div class="progress-info">
+              <span id="progressText">🎯 0/0 công việc hoàn thành</span>
+              <span id="progressPercent">0%</span>
+            </div>
+            <div class="progress-bar-track">
+              <div class="progress-bar-fill" id="progressBarFill"></div>
+            </div>
+          </div>
+        </header>
+
+        <form class="add-task-form" id="addTaskForm">
+          <div class="input-row">
+            <input
+              type="text"
+              id="taskInput"
+              class="task-input"
+              placeholder="✍️ Nhập công việc mới... (Ctrl+N)"
+              autocomplete="off"
+              required
+            />
+            <button type="submit" class="add-btn" id="addBtn">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              <span>Thêm việc</span>
+            </button>
+          </div>
+
+          <div class="options-row">
+            <div class="time-group">
+              <label for="startTimeInput" class="field-label">🕒 Thời gian biểu:</label>
+              <input type="time" id="startTimeInput" class="time-input" aria-label="Giờ bắt đầu" />
+              <span class="time-separator">–</span>
+              <input type="time" id="endTimeInput" class="time-input" aria-label="Giờ kết thúc" />
+            </div>
+
+            <button
+              type="button"
+              id="repeatToggleInput"
+              class="repeat-toggle-btn"
+              aria-pressed="false"
+              title="Bật để tự động lặp lại công việc này mỗi ngày lúc 00:00"
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="17 1 21 5 17 9" />
+                <path d="M3 11V9a4 4 0 0 1 4-4h14" />
+                <polyline points="7 23 3 19 7 15" />
+                <path d="M21 13v2a4 4 0 0 1-4 4H3" />
+              </svg>
+              <span>Lặp lại mỗi ngày</span>
+            </button>
+          </div>
+
+          <div class="tag-picker-row" role="group" aria-label="Chọn nhãn phân loại">
+            <span class="field-label">🏷️ Nhãn:</span>
+            <div class="tag-picker-list" id="tagPickerList">
+              <button type="button" class="tag-pick-btn active" data-tag="work">💻 Công việc</button>
+              <button type="button" class="tag-pick-btn" data-tag="study">📚 Học tập</button>
+              <button type="button" class="tag-pick-btn" data-tag="personal">🏠 Cá nhân</button>
+              <button type="button" class="tag-pick-btn" data-tag="sport">🏃‍♂️ Thể thao</button>
+            </div>
+          </div>
+        </form>
+
+        <div class="filter-bar" role="tablist" aria-label="Lọc công việc">
+          <button type="button" class="filter-btn active" data-filter="all">📋 Tất cả</button>
+          <button type="button" class="filter-btn" data-filter="study">📚 Học tập</button>
+          <button type="button" class="filter-btn" data-filter="work">💻 Công việc</button>
+          <button type="button" class="filter-btn" data-filter="personal">🏠 Cá nhân</button>
+          <button type="button" class="filter-btn" data-filter="sport">🏃‍♂️ Thể thao</button>
+          <button type="button" class="filter-btn" data-filter="daily">🔄 Lặp lại</button>
+          <button type="button" class="filter-btn" data-filter="pending">⏳ Chưa xong</button>
+          <button type="button" class="filter-btn" data-filter="completed">✅ Đã xong</button>
+        </div>
+
+        <ul class="task-list" id="taskList" aria-live="polite"></ul>
+
+        <div class="empty-state" id="emptyState" hidden>
+          <div class="empty-icon">🏔️</div>
+          <p class="empty-title">Chưa có công việc nào cho ngày này</p>
+          <p class="empty-subtitle">Nhấn Ctrl+N để thêm nhanh, kéo thả ⋮⋮ để sắp xếp hoặc nhấp đúp để sửa.</p>
+        </div>
+
+        <p class="interaction-tip">
+          ⌨️ Phím tắt: <kbd>Ctrl+N</kbd> Thêm việc • <kbd>Space</kbd> Chạy/Dừng Pomodoro • Nhấn <strong>📝</strong> để mở ghi chú &amp; việc nhỏ.
+        </p>
+      </main>
+
+      <!-- CỘT GIỮA: Thống kê Streak + Lịch tháng & Habit Tracker -->
+      <section class="middle-column" aria-label="Lịch và theo dõi thói quen">
+        <div class="glass-card streak-hero-card">
+          <div class="streak-main">
+            <div class="streak-flame" aria-hidden="true">🔥</div>
+            <div>
+              <p class="streak-label">Chuỗi duy trì liên tiếp</p>
+              <p class="streak-value"><span id="streakHeroCount">0</span> ngày</p>
+            </div>
+          </div>
+          <div class="streak-substats">
+            <div class="streak-sub-item">
+              <span class="sub-label">🏆 Kỷ lục</span>
+              <strong id="bestStreakCount">0 ngày</strong>
+            </div>
+            <div class="streak-sub-item">
+              <span class="sub-label">📊 Tháng này</span>
+              <strong id="monthRateText">0%</strong>
+            </div>
+          </div>
+        </div>
+
+        <aside class="glass-card calendar-card" aria-label="Lịch đếm ngày hoàn thành trong tháng">
+          <div class="calendar-header">
+            <div>
+              <p class="calendar-kicker">🗓️ Check-in thói quen</p>
+              <h2 class="calendar-title" id="calendarMonthTitle">Tháng --, ----</h2>
+            </div>
+            <button
+              type="button"
+              class="confirm-day-btn"
+              id="confirmDayBtn"
+              title="Xác nhận hoàn thành hoặc bỏ hoàn thành ngày đang chọn"
+            >
+              ✔️ Xác nhận xong ngày
+            </button>
+          </div>
+
+          <div class="calendar-stats" id="calendarStats">
+            <span class="stat-badge stat-done">✔️ <strong id="doneDaysCount">0</strong> xong</span>
+            <span class="stat-badge stat-pending">❌ <strong id="pendingDaysCount">0</strong> chưa xong</span>
+          </div>
+
+          <div class="calendar-weekdays" aria-hidden="true">
+            <span>T2</span>
+            <span>T3</span>
+            <span>T4</span>
+            <span>T5</span>
+            <span>T6</span>
+            <span>T7</span>
+            <span>CN</span>
+          </div>
+
+          <div class="calendar-grid" id="calendarGrid"></div>
+
+          <p class="calendar-hint">
+            💡 Nhấn vào ngày bất kỳ trên lịch để xem và quản lý công việc của ngày đó.
+          </p>
+        </aside>
+      </section>
+
+      <!-- CỘT PHẢI: Trung tâm tập trung (Pomodoro + Âm thanh + Ghi chú) -->
+      <section class="right-column" aria-label="Trung tâm tập trung">
+        <section class="glass-card pomodoro-card" aria-label="Đồng hồ tập trung Pomodoro">
+          <div class="pomo-header">
+            <div>
+              <p class="pomo-kicker">🍅 Trung tâm Pomodoro</p>
+              <h2 class="pomo-title" id="pomoCycleStatus">Chu kỳ làm việc 1/4</h2>
+            </div>
+            <div class="pomo-mode-switch" role="group" aria-label="Chế độ Pomodoro">
+              <button type="button" class="pomo-mode-btn active" data-mode="work">Làm việc</button>
+              <button type="button" class="pomo-mode-btn" data-mode="break">Nghỉ ngơi</button>
+            </div>
+          </div>
+
+          <div class="pomo-settings-row">
+            <label class="pomo-setting-item">
+              <span>Làm việc (p)</span>
+              <input type="number" id="pomoWorkInput" min="1" max="120" value="25" />
+            </label>
+            <label class="pomo-setting-item">
+              <span>Nghỉ (p)</span>
+              <input type="number" id="pomoBreakInput" min="1" max="60" value="5" />
+            </label>
+            <label class="pomo-setting-item">
+              <span>Số chu kỳ</span>
+              <input type="number" id="pomoCyclesInput" min="1" max="12" value="4" />
+            </label>
+          </div>
+
+          <div class="pomo-focus-box">
+            <span class="pomo-focus-label">🎯 Đang tập trung:</span>
+            <span class="pomo-focus-task" id="pomoFocusTask">Chưa chọn công việc</span>
+          </div>
+
+          <div class="pomo-timer-display" id="pomoTimerDisplay">25:00</div>
+
+          <div class="pomo-controls">
+            <button type="button" class="pomo-btn pomo-btn-primary" id="pomoStartBtn">▶ Bắt đầu</button>
+            <button type="button" class="pomo-btn pomo-btn-secondary" id="pomoPauseBtn" disabled>⏸ Tạm dừng</button>
+            <button type="button" class="pomo-btn pomo-btn-ghost" id="pomoResetBtn">↺ Đặt lại</button>
+          </div>
+        </section>
+
+        <section class="glass-card ambient-card" aria-label="Âm thanh nền thư giãn">
+          <div class="ambient-header">
+            <div>
+              <p class="ambient-kicker">🎧 Âm thanh thư giãn</p>
+              <h2 class="ambient-title">Nhạc nền tập trung</h2>
+            </div>
+            <div class="ambient-volume-wrap" title="Âm lượng âm thanh nền">
+              <span aria-hidden="true">🔊</span>
+              <input
+                type="range"
+                id="ambientVolume"
+                min="0"
+                max="100"
+                value="45"
+                aria-label="Âm lượng âm thanh nền"
+              />
+            </div>
+          </div>
+
+          <div class="ambient-buttons" role="group" aria-label="Chọn âm thanh thiên nhiên">
+            <button type="button" class="ambient-btn" data-sound="rain">🌧️ Mưa rơi</button>
+            <button type="button" class="ambient-btn" data-sound="stream">🌊 Suối chảy</button>
+            <button type="button" class="ambient-btn" data-sound="forest">🌲 Tiếng rừng</button>
+          </div>
+        </section>
+
+        <section class="glass-card scratchpad-card" aria-label="Sổ ghi chú nhanh">
+          <div class="scratchpad-header">
+            <div>
+              <p class="scratchpad-kicker">📝 Sổ ghi chú nhanh</p>
+              <span class="scratchpad-status" id="scratchpadStatus">✓ Tự động lưu</span>
+            </div>
+            <button
+              type="button"
+              class="scratchpad-clear-btn"
+              id="clearScratchpadBtn"
+              title="Xóa nội dung ghi chú"
+            >
+              🗑️ Xóa
+            </button>
+          </div>
+          <textarea
+            id="scratchpadInput"
+            class="scratchpad-textarea"
+            rows="4"
+            placeholder="Viết nhanh ý tưởng, việc phát sinh trong ngày..."
+          ></textarea>
+        </section>
+      </section>
+    </div>
+  </div>
+
+  <!-- Thanh Pomodoro ghim nổi (Sticky Mini Bar) -->
+  <div class="pomo-mini-bar" id="pomoMiniBar" aria-label="Thanh Pomodoro thu gọn">
+    <span class="mini-badge">🍅</span>
+    <span class="mini-timer" id="miniPomoTimer">25:00</span>
+    <span class="mini-sep">•</span>
+    <span class="mini-status" id="miniPomoStatus">Làm việc 1/4</span>
+    <span class="mini-task" id="miniPomoTask"></span>
+    <div class="mini-actions">
+      <button type="button" class="mini-btn mini-btn-primary" id="miniPomoToggleBtn" title="Bắt đầu / Tạm dừng (Space)">▶</button>
+      <button type="button" class="mini-btn" id="miniPomoResetBtn" title="Đặt lại Pomodoro">↺</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
